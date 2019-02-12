@@ -19,7 +19,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:layout_toEndOf="@+id/name_label" />
+        android:layout_toEndOf="@+id/name_label"
+        android:autofillHints="@string/name" />
 
     <TextView
         android:id="@+id/email_label"
@@ -34,7 +35,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/name"
         android:layout_marginTop="50dp"
-        android:layout_toEndOf="@+id/email_label" />
+        android:layout_toEndOf="@+id/email_label"
+        android:autofillHints="@string/email" />
 
 
 </RelativeLayout>
