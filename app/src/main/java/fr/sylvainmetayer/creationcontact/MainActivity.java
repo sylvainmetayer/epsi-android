@@ -1,15 +1,20 @@
 package fr.sylvainmetayer.creationcontact;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String EMAIL = "fr.sylvainmetayer.creationcontact.EMAIL";
+    public static final String NAME = "fr.sylvainmetayer.creationcontact.NAME";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,13 +24,25 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
+
+        final EditText name = findViewById(R.id.name);
+        final EditText email = findViewById(R.id.email);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                sendForm(view);
             }
         });
+    }
+
+    public void sendForm(View view) {
+        Intent intent = new Intent(this, SubmitFormActivity.class);
+        String email = ((EditText) findViewById(R.id.email)).getText().toString();
+        String name = ((EditText) findViewById(R.id.name)).getText().toString();
+        intent.putExtra(EMAIL, email);
+        intent.putExtra(NAME, name);
+        startActivity(intent);
     }
 
     @Override
