@@ -16,11 +16,13 @@ import android.widget.Toast;
 
 import moe.feng.support.biometricprompt.BiometricPromptCompat;
 
-public class MainActivity extends AppCompatActivity implements BiometricPromptCompat.IAuthenticationCallback {
+public class MainActivity extends AppCompatActivity {
 
     public static final String EMAIL = "fr.sylvainmetayer.creationcontact.EMAIL";
     public static final String NAME = "fr.sylvainmetayer.creationcontact.NAME";
 
+
+    public FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,31 +31,43 @@ public class MainActivity extends AppCompatActivity implements BiometricPromptCo
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
 
         final BiometricPromptCompat biometricPrompt =
                 new BiometricPromptCompat.Builder(MainActivity.this)
-                        .setTitle("Title")
-                        .setSubtitle("Subtitle")
-                        .setDescription("Description: blablablablablablablablablablabla...")
-                        .setNegativeButton("Use password", (dialog, which) -> Toast.makeText(
-                                MainActivity.this,
-                                "You requested password.",
-                                Toast.LENGTH_LONG).show())
+                        .setTitle("Authentification requise")
+                        .setDescription("Vous devez être authentifié pour pouvoir soumettre le formulaire")
                         .build();
 
         final CancellationSignal cancellationSignal = new CancellationSignal();
 
         cancellationSignal.setOnCancelListener(() -> Toast.makeText(
-                MainActivity.this, "onCancel", Toast.LENGTH_SHORT).show());
-        biometricPrompt.authenticate(cancellationSignal, this);
+                MainActivity.this, "Vous avez annulé", Toast.LENGTH_SHORT).show());
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(view -> biometricPrompt.authenticate(cancellationSignal, new BiometricPromptCompat.IAuthenticationCallback() {
             @Override
-            public void onClick(View view) {
-                sendForm(view);
+            public void onAuthenticationError(int errorCode, @Nullable CharSequence errString) {
+                Toast.makeText(MainActivity.this, "Une erreur est survenue", Toast.LENGTH_SHORT).show();
             }
-        });
+
+            @Override
+            public void onAuthenticationHelp(int helpCode, @Nullable CharSequence helpString) {
+                Toast.makeText(MainActivity.this, "HELP", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationSucceeded(@NonNull BiometricPromptCompat.IAuthenticationResult result) {
+                sendForm(view);
+                Toast.makeText(MainActivity.this, "Vous êtes authentifié avec succès !", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                Toast.makeText(MainActivity.this, "L'identification a échoué !", Toast.LENGTH_SHORT).show();
+
+            }
+        }));
+
     }
 
     public void sendForm(View view) {
@@ -85,27 +99,5 @@ public class MainActivity extends AppCompatActivity implements BiometricPromptCo
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-
-    @Override
-    public void onAuthenticationError(int errorCode, @Nullable CharSequence errString) {
-        Toast.makeText(MainActivity.this, "error", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onAuthenticationHelp(int helpCode, @Nullable CharSequence helpString) {
-        Toast.makeText(MainActivity.this, "help", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onAuthenticationSucceeded(
-            @NonNull BiometricPromptCompat.IAuthenticationResult result) {
-        Toast.makeText(MainActivity.this, "succeed", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onAuthenticationFailed() {
-        Toast.makeText(MainActivity.this, "failed", Toast.LENGTH_SHORT).show();
     }
 }
