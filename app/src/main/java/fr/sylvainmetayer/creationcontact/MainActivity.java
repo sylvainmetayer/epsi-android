@@ -25,9 +25,6 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton fab = findViewById(R.id.fab);
 
-        final EditText name = findViewById(R.id.name);
-        final EditText email = findViewById(R.id.email);
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
