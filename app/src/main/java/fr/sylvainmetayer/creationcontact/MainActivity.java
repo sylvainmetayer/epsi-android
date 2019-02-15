@@ -14,11 +14,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.List;
+
 import moe.feng.support.biometricprompt.BiometricPromptCompat;
 
 public class MainActivity extends AppCompatActivity {
 
     public FloatingActionButton fab;
+    public FloatingActionButton delete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         fab = findViewById(R.id.fab);
+        delete = findViewById(R.id.delete);
+
 
         final BiometricPromptCompat biometricPrompt =
                 new BiometricPromptCompat.Builder(MainActivity.this)
@@ -39,6 +44,19 @@ public class MainActivity extends AppCompatActivity {
 
         cancellationSignal.setOnCancelListener(() -> Toast.makeText(
                 MainActivity.this, "Vous avez annulé", Toast.LENGTH_SHORT).show());
+
+        delete.setOnClickListener(view -> {
+            AppDatabase db = AppDatabase.getDb(this.getApplicationContext());
+            List<User> userList = db.userDao().getAll();
+
+            for (User user : userList) {
+                db.userDao().delete(user);
+            }
+
+            Toast.makeText(getBaseContext(), "Toutes les données ont été effacées !", Toast.LENGTH_LONG)
+                    .show();
+
+        });
 
         fab.setOnClickListener(view -> biometricPrompt.authenticate(cancellationSignal, new BiometricPromptCompat.IAuthenticationCallback() {
             @Override
