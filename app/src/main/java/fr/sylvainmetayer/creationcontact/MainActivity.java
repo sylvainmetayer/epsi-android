@@ -2,6 +2,9 @@ package fr.sylvainmetayer.creationcontact;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CancellationSignal;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -9,8 +12,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import moe.feng.support.biometricprompt.BiometricPromptCompat;
+
+public class MainActivity extends AppCompatActivity implements BiometricPromptCompat.IAuthenticationCallback {
 
     public static final String EMAIL = "fr.sylvainmetayer.creationcontact.EMAIL";
     public static final String NAME = "fr.sylvainmetayer.creationcontact.NAME";
@@ -24,6 +30,23 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
+
+        final BiometricPromptCompat biometricPrompt =
+                new BiometricPromptCompat.Builder(MainActivity.this)
+                        .setTitle("Title")
+                        .setSubtitle("Subtitle")
+                        .setDescription("Description: blablablablablablablablablablabla...")
+                        .setNegativeButton("Use password", (dialog, which) -> Toast.makeText(
+                                MainActivity.this,
+                                "You requested password.",
+                                Toast.LENGTH_LONG).show())
+                        .build();
+
+        final CancellationSignal cancellationSignal = new CancellationSignal();
+
+        cancellationSignal.setOnCancelListener(() -> Toast.makeText(
+                MainActivity.this, "onCancel", Toast.LENGTH_SHORT).show());
+        biometricPrompt.authenticate(cancellationSignal, this);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,5 +85,27 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public void onAuthenticationError(int errorCode, @Nullable CharSequence errString) {
+        Toast.makeText(MainActivity.this, "error", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onAuthenticationHelp(int helpCode, @Nullable CharSequence helpString) {
+        Toast.makeText(MainActivity.this, "help", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onAuthenticationSucceeded(
+            @NonNull BiometricPromptCompat.IAuthenticationResult result) {
+        Toast.makeText(MainActivity.this, "succeed", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onAuthenticationFailed() {
+        Toast.makeText(MainActivity.this, "failed", Toast.LENGTH_SHORT).show();
     }
 }
