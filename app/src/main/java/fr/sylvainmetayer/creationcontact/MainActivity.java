@@ -22,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
 
     public FloatingActionButton fab;
     public FloatingActionButton delete;
+    public FloatingActionButton findBy;
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,10 +31,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        db = AppDatabase.getDb(this.getApplicationContext());
 
         fab = findViewById(R.id.fab);
         delete = findViewById(R.id.delete);
-
+        findBy = findViewById(R.id.find_by);
 
         final BiometricPromptCompat biometricPrompt =
                 new BiometricPromptCompat.Builder(MainActivity.this)
@@ -46,16 +49,42 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this, "Vous avez annulé", Toast.LENGTH_SHORT).show());
 
         delete.setOnClickListener(view -> {
-            AppDatabase db = AppDatabase.getDb(this.getApplicationContext());
-            List<User> userList = db.userDao().getAll();
+            List<User> userList = this.db.userDao().getAll();
 
             for (User user : userList) {
-                db.userDao().delete(user);
+                this.db.userDao().delete(user);
             }
 
             Toast.makeText(getBaseContext(), "Toutes les données ont été effacées !", Toast.LENGTH_LONG)
                     .show();
 
+        });
+
+        findBy.setOnClickListener(view -> {
+            String email = ((EditText) findViewById(R.id.email)).getText().toString();
+            String name = ((EditText) findViewById(R.id.name)).getText().toString();
+            List<User> userList = this.db.userDao().findByNameOrEmail(name, email);
+
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder
+                    .append("Résultats : ")
+                    .append("\n");
+
+            if (userList.size() <= 0) {
+                stringBuilder.append("Aucun");
+            }
+
+            for (User user : userList) {
+                stringBuilder
+                        .append(user.name)
+                        .append(" - ")
+                        .append(user.email)
+                        .append("\n");
+            }
+
+            Toast.makeText(getApplicationContext(), stringBuilder.toString(), Toast.LENGTH_LONG).show();
         });
 
         fab.setOnClickListener(view -> biometricPrompt.authenticate(cancellationSignal, new BiometricPromptCompat.IAuthenticationCallback() {
@@ -88,13 +117,11 @@ public class MainActivity extends AppCompatActivity {
         String email = ((EditText) findViewById(R.id.email)).getText().toString();
         String name = ((EditText) findViewById(R.id.name)).getText().toString();
 
-        AppDatabase db = AppDatabase.getDb(this.getApplicationContext());
-
         User user = new User();
         user.email = email;
         user.name = name;
 
-        db.userDao().insert(user);
+        this.db.userDao().insert(user);
 
         Intent intent = new Intent(this, SubmitFormActivity.class);
         startActivity(intent);
