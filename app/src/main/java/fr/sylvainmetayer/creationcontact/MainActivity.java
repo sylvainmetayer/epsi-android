@@ -1,5 +1,6 @@
 package fr.sylvainmetayer.creationcontact;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -14,6 +15,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+
 import moe.feng.support.biometricprompt.BiometricPromptCompat;
 
 public class MainActivity extends AppCompatActivity {
@@ -21,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String EMAIL = "fr.sylvainmetayer.creationcontact.EMAIL";
     public static final String NAME = "fr.sylvainmetayer.creationcontact.NAME";
 
+    public static final String filename = "name_email";
 
     public FloatingActionButton fab;
 
@@ -71,9 +79,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void sendForm(View view) {
-        Intent intent = new Intent(this, SubmitFormActivity.class);
         String email = ((EditText) findViewById(R.id.email)).getText().toString();
         String name = ((EditText) findViewById(R.id.name)).getText().toString();
+        String fileContents = name + " - " + email + "\n";
+
+        try {
+            FileOutputStream outputStream;
+            StringBuilder stringBuilder = new StringBuilder();
+
+            try {
+                FileInputStream inputStream = openFileInput(MainActivity.filename);
+                if (inputStream != null) {
+                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                    String receiveString;
+                    while ((receiveString = bufferedReader.readLine()) != null) {
+                        stringBuilder.append(receiveString);
+                    }
+                    inputStream.close();
+                }
+            } catch (FileNotFoundException e) {
+                System.err.println("File not found");
+            }
+
+            stringBuilder.append(fileContents);
+            outputStream = openFileOutput(MainActivity.filename, Context.MODE_PRIVATE);
+            outputStream.write(stringBuilder.toString().getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Intent intent = new Intent(this, SubmitFormActivity.class);
+
         intent.putExtra(EMAIL, email);
         intent.putExtra(NAME, name);
         startActivity(intent);
