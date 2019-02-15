@@ -12,18 +12,18 @@ import android.support.annotation.NonNull;
 public abstract class AppDatabase extends RoomDatabase {
     public abstract UserDao userDao();
 
-    static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+    private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             // Since we didn't alter the table, there's nothing else to do here.
         }
     };
 
-    public static String databaseName = "users";
+    private static String databaseName = "users";
 
-    public static AppDatabase db = null;
+    private static AppDatabase db = null;
 
-    public static AppDatabase getDb(Context context) {
+    static AppDatabase getDb(Context context) {
         if (AppDatabase.db == null) {
             db = Room.databaseBuilder(context,
                     AppDatabase.class, AppDatabase.databaseName)
